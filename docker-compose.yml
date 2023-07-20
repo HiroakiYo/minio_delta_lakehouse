@@ -1,0 +1,53 @@
+version: '0'
+services:
+  minio: 
+    hostname: minio
+    image: 'quay.io/minio/minio:latest'
+    container_name: minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - ./minio-data:/data
+    environment:
+      MINIO_ROOT_USER: minio_access_key
+      MINIO_ROOT_PASSWORD: minio_secret_key
+    command: server /data --console-address ":9001"
+    networks:
+      lakehouse-network:
+        ipv4_address: 172.24.0.10
+
+
+  delta: 
+    hostname: delta
+    container_name: delta
+    build: .
+    ports:
+      - '5000:5000'
+    command: flask --app ./flask/app run --host 0.0.0.0
+    networks:
+      - lakehouse-network
+    volumes:
+      - ./flask:/opt/spark/work-dir/flask
+
+# debugging command in delta container to run interactie spark shell 
+
+# $SPARK_HOME/bin/pyspark \
+# --packages io.delta:delta-core_2.12:2.4.0,org.apache.hadoop:hadoop-aws:3.3.4 \
+# --conf "spark.hadoop.fs.s3a.access.key=minio_access_key" \
+# --conf "spark.hadoop.fs.s3a.secret.key=minio_secret_key" \
+# --conf "spark.hadoop.fs.s3a.endpoint=http://172.24.0.10:9000" \
+# --conf "spark.databricks.delta.retentionDurationCheck.enabled=false" \
+# --conf "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension" \
+# --conf "spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog"
+
+volumes:
+  minio-data:
+    driver: local
+
+networks:
+  lakehouse-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.24.0.0/16
