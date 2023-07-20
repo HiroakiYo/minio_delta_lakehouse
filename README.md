@@ -9,6 +9,6 @@
 - `docker-compose up`
 - use `docker-compose down` when finish using the container
 
-MinIO buckets can be viewed on [localhost:9001](localhost:9001) once the containers are running.
+MinIO buckets can be viewed on `localhost:9001` once the containers are running.
 
-You can check if deltalake is connected to Minio storage by accessing [localhost:5000](localhost:5000)
+You can check if deltalake is connected to Minio storage by accessing `localhost:5000`
