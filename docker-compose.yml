@@ -30,6 +30,21 @@ services:
     volumes:
       - ./flask:/opt/spark/work-dir/flask
 
+  jupyter:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM jupyter/all-spark-notebook:spark-3.4.1
+        ADD ./minio-jar/aws-java-sdk-bundle-1.12.262.jar /usr/local/spark/jars
+        ADD ./minio-jar/hadoop-aws-3.3.4.jar /usr/local/spark/jars
+    ports:
+      - '8888:8888'
+    volumes:
+      - ./jupyter/data:/data
+    networks:
+      lakehouse-network:
+
+
 # debugging command in delta container to run interactie spark shell 
 
 # $SPARK_HOME/bin/pyspark \
